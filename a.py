@@ -26,7 +26,6 @@ def rho(h):
 def max_action(h, u):
     p = [(u[i], a) for (i, a) in enumerate(Action) if a in actions(h)]
     return max(p, key=operator.itemgetter(0))[1]
-    return 
 
 def random_choice(_x):
     return [random.random() for _ in range(3)]
