@@ -4,10 +4,13 @@
 import enum
 import immutables
 import random
+import operator
 
 
 Round = enum.Enum('Round', 'deal bet complete')
 Action = enum.Enum('Action', 'bet call fold')
+
+## game
 
 def deal():
     return immutables.Map(
@@ -87,24 +90,73 @@ def actions(h):
     else:
         print("actions: unrecognised round " + str(r))
 
+def is_complete(h):
+    return h.get('round') == Round.complete
 
-# h = deal()
-# 
-# act_bet(h)
-# 
-# act_bet(deal())
-# 
-# act_call(act_bet(h))
-# 
-# act_call(act_bet(deal()))
-# 
-# act_fold(h)
-# 
-# act_fold(act_bet(h))
-# 
-# act_call(act_bet(h))
-# 
-# act_call(act_bet(deal()))
+
+## model
+
+def rho(h):
+    p = h.get('to_act')
+    if p == 'player1':
+        a = [1, 0]
+    else:
+        a = [0, 1]
+    c = [0, 0, 0]
+    c[h.get('hands').get(p) - 1] = 1
+    a.extend(c)
+    return a
+
+def random_choice(_x):
+    return [random.random() for _ in range(len(Action))]
+
+def max_action(h, u):
+    p = [(u[i], a) for (i, a) in enumerate(Action) if a in actions(h)]
+    return max(p, key=operator.itemgetter(0))[1]
+
+def phi(f):
+    return lambda h: max_action(h, f(rho(h)))
+
+## collector
+
+def complete_hand(h, choice):
+    if is_complete(h):
+        return h
+    else:
+        return complete_hand(act(h, choice(h)), choice)
+
+### does `phi` sit inside `complete_hand`, viz
+
+def complete(h, f):
+    if is_complete(h):
+        return h
+    else: 
+        return complete(act(h, phi(f)(h)), f)
+
+## "test" collector
+
+h = deal()
+complete_hand(h, phi(random_choice))
+
+## "test" model
+
+h = deal()
+rho(h)
+u = random_choice(rho(h))
+max_action(h, u)
+phi(random_choice)(h)
+
+## "test" game
+
+h = deal()
+act_bet(h)
+act_bet(deal())
+act_call(act_bet(h))
+act_call(act_bet(deal()))
+act_fold(h)
+act_fold(act_bet(h))
+act_call(act_bet(h))
+act_call(act_bet(deal()))
 
 
 ### end
