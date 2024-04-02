@@ -29,6 +29,12 @@ def max_action(h, u):
     return max(p, key=operator.itemgetter(0))[1]
     return 
 
+def random_choice(_x):
+    return [random.random() for _ in range(3)]
+
+def phi(f):
+    return lambda h: max_action(h, f(rho(h)))
+
 
 def act_bet(h):
     with h.mutate() as m:
@@ -98,9 +104,8 @@ def actions(h):
         print("actions: unrecognised round " + str(r))
 
 
-
-def random_choice(h, _p):
-    return random.sample(actions(h), 1)[0]
+# def random_choice(h):
+#     return random.sample(actions(h), 1)[0]
 
 def is_complete(h):
     return h.get('round') == Round.complete
@@ -109,7 +114,7 @@ def complete_hand(h, choice):
     if is_complete(h):
         return h
     else:
-        return complete_hand(act(h, choice(h, h.get('to_act'))), choice)
+        return complete_hand(act(h, choice(h)), choice)
 
 
 def run(h, choice, collector):
@@ -117,7 +122,7 @@ def run(h, choice, collector):
         collector.update({'hand': h})
         return
     else:
-        run(act(h, choice(h, h.get('to_act'))), choice, collector)
+        run(act(h, choice(h)), choice, collector)
         outcomes = {a: complete_hand(act(h, a), choice).get('payout') for a in actions(h)}
         collector.update({'outcomes': [(h, outcomes)] + collector.get('outcomes')})
         return
@@ -128,11 +133,15 @@ random.seed(103)
 h = deal()
 
 collector = {'hand': None, 'outcomes': []}
-run(h, random_choice, collector)
+run(h, phi(random_choice), collector)
+
+collector = {'hand': None, 'outcomes': []}; run(deal(), phi(random_choice), collector); collector
 
 
-complete_hand(h, random_choice)
-complete_hand(deal(), random_choice)
+complete_hand(h, phi(random_choice))
+
+complete_hand(deal(), phi(random_choice))
+
 
 act_fold(h)
 

@@ -5,11 +5,10 @@
 see a.py
 
 ## next steps
- - choose action based on a function of the representation of the state, first step towards using a nn to choose the action
- - a collector worth its salt
+ - collect representation of state and outcomes of valid actions
 
 ## latest
- - max_action: choose valid action given state and expected payoff
+ - phi: choose valid action (i.e. taking account of which player is to act next) given state and expected payoff as a function of (a representation of) that state
  - rho: represent state as a vector
  - run game and collect state and outcomes on the way back up the tree i.e. after recursive calls
 
