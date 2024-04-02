@@ -5,12 +5,30 @@ import enum
 import immutables
 import random
 
+import operator
+
 Round = enum.Enum('Round', 'deal bet complete')
 Action = enum.Enum('Action', 'bet call fold')
 
 def deal():
     return immutables.Map(round = Round.deal, hands = {'player1': random.randint(1, 3), 'player2': random.randint(1, 3)}, pot = 2, to_act = 'player1', actions = [])
     
+def rho(h):
+    p = h.get('to_act')
+    if p == 'player1':
+        a = [1, 0]
+    else:
+        a = [0, 1]
+    c = [0, 0, 0]
+    c[h.get('hands').get(p) - 1] = 1
+    a.extend(c)
+    return a
+
+def max_action(h, u):
+    p = [(u[i], a) for (i, a) in enumerate(Action) if a in actions(h)]
+    return max(p, key=operator.itemgetter(0))[1]
+    return 
+
 
 def act_bet(h):
     with h.mutate() as m:
