@@ -4,7 +4,6 @@
 import enum
 import immutables
 import random
-
 import operator
 
 Round = enum.Enum('Round', 'deal bet complete')
@@ -104,9 +103,6 @@ def actions(h):
         print("actions: unrecognised round " + str(r))
 
 
-# def random_choice(h):
-#     return random.sample(actions(h), 1)[0]
-
 def is_complete(h):
     return h.get('round') == Round.complete
 
@@ -117,14 +113,20 @@ def complete_hand(h, choice):
         return complete_hand(act(h, choice(h)), choice)
 
 
+
 def run(h, choice, collector):
     if is_complete(h):
         collector.update({'hand': h})
         return
     else:
         run(act(h, choice(h)), choice, collector)
-        outcomes = {a: complete_hand(act(h, a), choice).get('payout') for a in actions(h)}
-        collector.update({'outcomes': [(h, outcomes)] + collector.get('outcomes')})
+        n = len(Action)
+        r = [0 for _ in range(n)]
+        p = h.get('to_act')
+        for (i, a) in enumerate(Action):
+            if a in actions(h):
+                r[i] = complete_hand(act(h, a), choice).get('payout').get(p)
+        collector.update({'outcomes': [(rho(h), r)] + collector.get('outcomes')})
         return
 
 
