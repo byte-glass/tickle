@@ -133,10 +133,33 @@ def complete(h, f):
     else: 
         return complete(act(h, phi(f)(h)), f)
 
+def run(h, f, collector):
+    if is_complete(h):
+        collector['actions'] = h.get('actions')
+        return
+    else:
+        run(act(h, phi(f)(h)), f, collector)
+        n = len(Action)
+        r = [0 for _ in range(n)]
+        p = h.get('to_act')
+        for (i, a) in enumerate(Action):
+            if a in actions(h):
+                r[i] = complete(act(h, a), f).get('payout').get(p)
+        collector['Xy'].append((rho(h), r))
+        return
+
+
 ## "test" collector
 
 h = deal()
 complete_hand(h, phi(random_choice))
+complete(h, random_choice)
+
+collector = {'actions': None, 'Xy': []}
+run(h, random_choice, collector)
+
+collector = {'actions': None, 'Xy': []}; run(deal(), random_choice, collector); collector
+
 
 ## "test" model
 

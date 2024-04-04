@@ -2,16 +2,15 @@
 
 ## one card lowball
 
-see a.py
+see b.py
 
 ## next steps
- - collect representation of state and outcomes of valid actions
+ - finishing touches to collector 
+ - nn model
 
 ## latest
- - phi: choose valid action (i.e. taking account of which player is to act next) given state and expected payoff as a function of (a representation of) that state
- - rho: represent state as a vector
- - run game and collect state and outcomes on the way back up the tree i.e. after recursive calls
-
+ - b.py -- improved version of a.py
+ - collect representation of state and outcomes of valid actions
 
 
 #### end
