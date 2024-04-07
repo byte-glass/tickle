@@ -2,15 +2,16 @@
 
 ## one card lowball
 
-see b.py
+see c.py
 
 ## next steps
- - finishing touches to collector 
  - nn model
 
 ## latest
+ - c.py -- improved version of b.py, introduce `batch` with float values ready for pytorch
+ - refactor `complete` to take choice function for each player (map from players to choice functions), this will make `play` simpler (more symmetrical between players)
+ - play -- play hands and keep track of winnings
  - b.py -- improved version of a.py
- - collect representation of state and outcomes of valid actions
 
 
 #### end

@@ -1,4 +1,4 @@
-# b.py
+# c.py
 
 
 import enum
@@ -16,16 +16,16 @@ def deal():
     return immutables.Map(
             round = Round.deal, 
             hands = {'player1': random.randint(1, 3), 'player2': random.randint(1, 3)}, 
-            payout = immutables.Map(player1 = 0, player2 = -2), 
-            pot = 2, 
+            payout = immutables.Map(player1 = 0.0, player2 = -2.0), 
+            pot = 2.0, 
             to_act = 'player1', 
             actions = [])
 
 def act_bet(h):
     with h.mutate() as m:
         y = h.get('payout')
-        m.set('payout', y.set('player1', y.get('player1') - 1))
-        m.set('pot', h.get('pot') + 1)
+        m.set('payout', y.set('player1', y.get('player1') - 1.0))
+        m.set('pot', h.get('pot') + 1.0)
         m.set('actions', h.get('actions') + [Action.bet])
         m.set('to_act', 'player2')
         m.set('round', Round.bet)
@@ -35,15 +35,15 @@ def act_bet(h):
 def act_call(h):
     with h.mutate() as m:
         y = h.get('payout')
-        p0 = y.set('player2', y.get('player2') - 1)
-        pot = h.get('pot') + 1
+        p0 = y.set('player2', y.get('player2') - 1.0)
+        pot = h.get('pot') + 1.0
         hands = h.get('hands')
         if hands.get('player1') < hands.get('player2'):
             p = p0.set('player1', p0.get('player1') + pot)
         elif hands.get('player1') > hands.get('player2'):
             p = p0.set('player2', p0.get('player2') + pot)
         else:
-            p = p0.set('player1', p0.get('player1') + pot // 2).set('player2', p0.get('player2') + pot // 2)
+            p = p0.set('player1', p0.get('player1') + pot / 2).set('player2', p0.get('player2') + pot / 2)
         m.set('payout', p)
         m.set('actions', h.get('actions') + [Action.call])
         m.pop('pot')
@@ -107,50 +107,30 @@ def get_action(h):
     else:
         return get_action(h)
 
+    
 def play(choice):
     p = 0
     while True:
-        h = deal()
-        a = get_action(h)
-        c = complete(act(h, a), choice)
-        y = c.get('payout').get('player1')
-        p += y
-        print(str(c.get('actions')) + ' ' + str(y) + '[' + str(p) + ']')
-        h = deal()
-        h = act(h, phi(choice)(h))
-        if not is_complete(h):
-            a = get_action(h)
-            h = act(h, a)
-        y = h.get('payout').get('player2')
-        p += y
-        print(str(h.get('actions')) + ' ' + str(y) + '[' + str(p) + ']')
-
-    
-def klay(choice):
-    p = 0
-    while True:
-        h = k(deal(), {'player1': get_action, 'player2': choice})
+        h = complete(deal(), {'player1': get_action, 'player2': choice})
         y = h.get('payout').get('player1')
         p += y
         print(str(h.get('actions')) + ' ' + str(y) + '[' + str(p) + ']')
-        h = k(deal(), {'player2': get_action, 'player1': choice})
+        h = complete(deal(), {'player2': get_action, 'player1': choice})
         y = h.get('payout').get('player2')
         p += y
         print(str(h.get('actions')) + ' ' + str(y) + '[' + str(p) + ']')
         
-# klay(phi(random_choice))
-
 
 ## model
 
 def rho(h):
     p = h.get('to_act')
     if p == 'player1':
-        a = [1, 0]
+        a = [1.0, 0.0]
     else:
-        a = [0, 1]
-    c = [0, 0, 0]
-    c[h.get('hands').get(p) - 1] = 1
+        a = [0.0, 1.0]
+    c = [0.0, 0.0, 0.0]
+    c[h.get('hands').get(p) - 1] = 1.0
     a.extend(c)
     return a
 
@@ -166,59 +146,69 @@ def phi(f):
 
 ## collector
 
-def complete_hand(h, choice):
-    if is_complete(h):
-        return h
-    else:
-        return complete_hand(act(h, choice(h)), choice)
-
-### does `phi` sit inside `complete_hand`, viz
-
-def complete(h, f):
-    if is_complete(h):
-        return h
-    else: 
-        return complete(act(h, phi(f)(h)), f)
-
-def k(h, s):
+def complete(h, s):
     if is_complete(h):
         return h
     else:
         p = h.get('to_act')
-        return k(act(h, s[p](h)), s)
+        return complete(act(h, s[p](h)), s)
 
-# s = {'player1': phi(random_choice), 'player2': phi(random_choice)}
-# s = {'player1': get_action, 'player2': phi(random_choice)}
-# s = {'player2': get_action, 'player1': phi(random_choice)}
-# k(deal(), s)
-
-def run(h, f, collector):
+def run(h, s, collector):
     if is_complete(h):
-        collector['actions'] = h.get('actions')
         return
     else:
-        run(act(h, phi(f)(h)), f, collector)
+        p = h.get('to_act')
+        run(act(h, s[p](h)), s, collector)
         n = len(Action)
         r = [0 for _ in range(n)]
-        p = h.get('to_act')
         for (i, a) in enumerate(Action):
             if a in actions(h):
-                r[i] = complete(act(h, a), f).get('payout').get(p)
-        collector['Xy'].append((rho(h), r))
+                r[i] = complete(act(h, a), s).get('payout').get(p)
+        collector['x'].append(rho(h))
+        collector['y'].append(r)
         return
 
+def batch(s, n):
+    x = []
+    y = []
+    while len(y) < n:
+        collector = {'x': [], 'y': []}
+        run(deal(), s, collector)
+        x.extend(collector['x'])
+        y.extend(collector['y'])
+    return x[:n], y[:n]
 
-## "test" collector
+
+## "test" batch
+
+s = {'player1': phi(random_choice), 'player2': phi(random_choice)}
+
+batch(s, 8)
+
+## "test" run and collector
+
+s = {'player1': phi(random_choice), 'player2': phi(random_choice)}
 
 h = deal()
-complete_hand(h, phi(random_choice))
-complete(h, random_choice)
 
-collector = {'actions': None, 'Xy': []}
-run(h, random_choice, collector)
+collector = {'x': [], 'y': []}
 
-collector = {'actions': None, 'Xy': []}; run(deal(), random_choice, collector); collector
+run(h, s, collector)
 
+collector = {'x': [], 'y': []}; run(h, s, collector); collector
+ 
+
+## "test" play
+
+play(phi(random_choice))
+
+## "test" complete
+
+s = {'player1': get_action, 'player2': phi(random_choice)}
+s = {'player2': get_action, 'player1': phi(random_choice)}
+s = {'player1': phi(random_choice), 'player2': phi(random_choice)}
+
+complete(deal(), s)
 
 ## "test" model
 
