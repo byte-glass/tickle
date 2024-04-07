@@ -16,7 +16,7 @@ def deal():
     return immutables.Map(
             round = Round.deal, 
             hands = {'player1': random.randint(1, 3), 'player2': random.randint(1, 3)}, 
-            payout = immutables.Map(player1 = 0, player2 = 0), 
+            payout = immutables.Map(player1 = 0, player2 = -2), 
             pot = 2, 
             to_act = 'player1', 
             actions = [])
@@ -93,6 +93,39 @@ def actions(h):
 def is_complete(h):
     return h.get('round') == Round.complete
 
+def get_action(h):
+    d = str(h.get('hands').get(h.get('to_act')))
+    z = actions(h)
+    p = '{' + d + '} ' + z[0].name + ' or ' + z[1].name + '? '
+    a = input(p)
+    if a == 'b' and Action.bet in z:
+        return Action.bet 
+    elif a == 'c' and Action.call in z:
+        return Action.call
+    elif a == 'f' and Action.fold in z:
+        return Action.fold
+    else:
+        return get_action(h)
+
+def play(choice):
+    p = 0
+    while True:
+        h = deal()
+        a = get_action(h)
+        c = complete(act(h, a), choice)
+        y = c.get('payout').get('player1')
+        p += y
+        print(str(c.get('actions')) + ' ' + str(y) + '[' + str(p) + ']')
+        h = deal()
+        h = act(h, phi(choice)(h))
+        if not is_complete(h):
+            a = get_action(h)
+            h = act(h, a)
+        y = h.get('payout').get('player2')
+        p += y
+        print(str(h.get('actions')) + ' ' + str(y) + '[' + str(p) + ']')
+
+    
 
 ## model
 
