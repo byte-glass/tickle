@@ -134,15 +134,12 @@ def rho(h):
     a.extend(c)
     return a
 
-def random_choice(_x):
-    return [random.random() for _ in range(len(Action))]
-
 def max_action(h, u):
     p = [(u[i], a) for (i, a) in enumerate(Action) if a in actions(h)]
     return max(p, key=operator.itemgetter(0))[1]
 
-def phi(f):
-    return lambda h: max_action(h, f(rho(h)))
+def random_choice(h):
+    return max_action(h, [random.random() for _ in range(len(Action))])
 
 ## collector
 
@@ -160,7 +157,7 @@ def run(h, s, collector):
         p = h.get('to_act')
         run(act(h, s[p](h)), s, collector)
         n = len(Action)
-        r = [0 for _ in range(n)]
+        r = [0.0 for _ in range(n)]
         for (i, a) in enumerate(Action):
             if a in actions(h):
                 r[i] = complete(act(h, a), s).get('payout').get(p)
@@ -181,13 +178,13 @@ def batch(s, n):
 
 ## "test" batch
 
-s = {'player1': phi(random_choice), 'player2': phi(random_choice)}
+s = {'player1': random_choice, 'player2': random_choice}
 
 batch(s, 8)
 
 ## "test" run and collector
 
-s = {'player1': phi(random_choice), 'player2': phi(random_choice)}
+s = {'player1': random_choice, 'player2': random_choice}
 
 h = deal()
 
@@ -200,13 +197,15 @@ collector = {'x': [], 'y': []}; run(h, s, collector); collector
 
 ## "test" play
 
-play(phi(random_choice))
+play(random_choice)
 
 ## "test" complete
 
-s = {'player1': get_action, 'player2': phi(random_choice)}
-s = {'player2': get_action, 'player1': phi(random_choice)}
-s = {'player1': phi(random_choice), 'player2': phi(random_choice)}
+s = {'player1': get_action, 'player2': random_choice}
+s = {'player2': get_action, 'player1': random_choice}
+s = {'player1': random_choice, 'player2': random_choice}
+
+s = {'player1': sc, 'player2': sc}
 
 complete(deal(), s)
 
@@ -216,7 +215,7 @@ h = deal()
 rho(h)
 u = random_choice(rho(h))
 max_action(h, u)
-phi(random_choice)(h)
+random_choice(h)
 
 ## "test" game
 
