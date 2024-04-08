@@ -141,6 +141,12 @@ def max_action(h, u):
 def random_choice(h):
     return max_action(h, [random.random() for _ in range(len(Action))])
 
+def model_choice(f):
+    return lambda h: max_action(h, f(rho(h)))
+
+# def sc(_x):
+#     return [random.random() for _ in range(len(Action))]
+
 ## collector
 
 def complete(h, s):
@@ -176,58 +182,60 @@ def batch(s, n):
     return x[:n], y[:n]
 
 
-## "test" batch
+if __name__ == '__main__':
 
-s = {'player1': random_choice, 'player2': random_choice}
+    ## "test" batch
 
-batch(s, 8)
+    s = {'player1': random_choice, 'player2': random_choice}
 
-## "test" run and collector
+    batch(s, 8)
 
-s = {'player1': random_choice, 'player2': random_choice}
+    ## "test" run and collector
 
-h = deal()
+    s = {'player1': random_choice, 'player2': random_choice}
 
-collector = {'x': [], 'y': []}
+    h = deal()
 
-run(h, s, collector)
+    collector = {'x': [], 'y': []}
 
-collector = {'x': [], 'y': []}; run(h, s, collector); collector
- 
+    run(h, s, collector)
 
-## "test" play
+    collector = {'x': [], 'y': []}; run(h, s, collector); collector
+     
 
-play(random_choice)
+    ## "test" play
 
-## "test" complete
+    play(random_choice)
 
-s = {'player1': get_action, 'player2': random_choice}
-s = {'player2': get_action, 'player1': random_choice}
-s = {'player1': random_choice, 'player2': random_choice}
+    ## "test" complete
 
-s = {'player1': sc, 'player2': sc}
+    s = {'player1': get_action, 'player2': random_choice}
+    s = {'player2': get_action, 'player1': random_choice}
+    s = {'player1': random_choice, 'player2': random_choice}
 
-complete(deal(), s)
+    s = {'player1': sc, 'player2': sc}
 
-## "test" model
+    complete(deal(), s)
 
-h = deal()
-rho(h)
-u = random_choice(rho(h))
-max_action(h, u)
-random_choice(h)
+    ## "test" model
 
-## "test" game
+    h = deal()
+    rho(h)
+    u = random_choice(rho(h))
+    max_action(h, u)
+    random_choice(h)
 
-h = deal()
-act_bet(h)
-act_bet(deal())
-act_call(act_bet(h))
-act_call(act_bet(deal()))
-act_fold(h)
-act_fold(act_bet(h))
-act_call(act_bet(h))
-act_call(act_bet(deal()))
+    ## "test" game
+
+    h = deal()
+    act_bet(h)
+    act_bet(deal())
+    act_call(act_bet(h))
+    act_call(act_bet(deal()))
+    act_fold(h)
+    act_fold(act_bet(h))
+    act_call(act_bet(h))
+    act_call(act_bet(deal()))
 
 
 ### end
