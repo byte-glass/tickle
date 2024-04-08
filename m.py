@@ -69,7 +69,7 @@ def test(dataloader, model, loss_fn):
 ##
 
 ### this is where the model meets pytorch, lots of `t. ..` -- hmmm??
-def soft_max_sample(model, mu):
+def soft_sample(model, mu):
     def choice(h):
         z = [(i, a) for (i, a) in enumerate(t.Action) if a in t.actions(h)]
         r = torch.exp(mu * model(torch.tensor(t.rho(h))))[[i for (i, _) in z]]
@@ -85,7 +85,7 @@ def sigma(mu, x):
 
 def make_dataloader(model, mu, size, batch):
     model.eval()
-    s = {'player1': soft_max_sample(model, mu), 'player2': soft_max_sample(model, mu)}
+    s = {'player1': soft_sample(model, mu), 'player2': soft_sample(model, mu)}
     x, y = t.batch(s, size)
     x = torch.tensor(x)
     y = torch.tensor(y)
@@ -111,15 +111,15 @@ for _ in range(5):
 
 
 
-#     ## "test" soft_max_sample
+#     ## "test" soft_sample
 # 
 #     mu = 0.0001
-#     s = {'player1': soft_max_sample(model, mu), 'player2': soft_max_sample(model, mu)}
+#     s = {'player1': soft_sample(model, mu), 'player2': soft_sample(model, mu)}
 #     t.batch(s, 4)
 # 
-#     soft_max_sample(model, mu)(t.deal())
+#     soft_sample(model, mu)(t.deal())
 # 
-#     soft_max_sample(model, mu)(t.act_bet(t.deal()))
+#     soft_sample(model, mu)(t.act_bet(t.deal()))
 # 
 # 
 #     model.eval()
